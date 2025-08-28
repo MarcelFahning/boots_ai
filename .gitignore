@@ -8,4 +8,4 @@ wheels/
 
 # Virtual environments
 .venv
-.gcp_key.env
+.env
