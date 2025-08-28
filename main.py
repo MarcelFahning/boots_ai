@@ -15,9 +15,10 @@ def main():
     messages = [
     types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
-    is_verbose = False
-    if sys.argv[2] == "--verbose":
-        is_verbose = True
+    if len(sys.argv) > 2:
+        is_verbose = False
+        if sys.argv[2] == "--verbose":
+            is_verbose = True
     generated_content = client.models.generate_content(model="gemini-2.0-flash-001", contents=messages)
     print(generated_content.text)
     if is_verbose:
