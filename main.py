@@ -15,6 +15,8 @@ def main():
     messages = [
     types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
+
+    is_verbose = False
     if len(sys.argv) > 2:
         is_verbose = False
         if sys.argv[2] == "--verbose":
