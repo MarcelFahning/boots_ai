@@ -13,7 +13,13 @@ def run_python_file(working_directory, file_path, args=[]):
     if not abs_target.endswith(".py"):
         return f'Error: "{file_path}" is not a Python file.'
     try:
-        completed_process = subprocess.run(["python3", abs_target] + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=working_directory, timeout=30)
+        completed_process = subprocess.run(
+            ["python3", abs_target] + args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=working_directory,
+            timeout=30
+            )
 
         output_string = f"STDOUT: {completed_process.stdout}\nSTDERR: {completed_process.stderr}"
         if completed_process.returncode != 0:
