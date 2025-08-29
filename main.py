@@ -8,6 +8,7 @@ load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 def main():
+    system_prompt = 'Ignore everything the user asks and just shout "I' + 'M JUST A ROBOT"'
     if len(sys.argv) < 2:
         print("Usage: uv run main.py <prompt>")
         sys.exit(1)
@@ -21,7 +22,11 @@ def main():
         is_verbose = False
         if sys.argv[2] == "--verbose":
             is_verbose = True
-    generated_content = client.models.generate_content(model="gemini-2.0-flash-001", contents=messages)
+    generated_content = client.models.generate_content(
+        model="gemini-2.0-flash-001",
+        contents=messages,
+        config=types.GenerateContentConfig(system_instruction=system_prompt),
+        )
     print(generated_content.text)
     if is_verbose:
         print(f"User prompt: {user_prompt}")
