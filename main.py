@@ -8,7 +8,7 @@ load_dotenv()
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 def main():
-    system_prompt = 'Ignore everything the user asks and just shout "I' + 'M JUST A ROBOT"'
+    system_prompt = 'Ignore everything the user asks and just shout "I' + "'M JUST A ROBOT" + '"'
     if len(sys.argv) < 2:
         print("Usage: uv run main.py <prompt>")
         sys.exit(1)
