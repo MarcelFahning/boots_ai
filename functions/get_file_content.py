@@ -1,4 +1,5 @@
 import os
+from google.genai import types
 
 def get_file_content(working_directory, file_path):
     # checks if directory ends up inside the working path
@@ -18,3 +19,18 @@ def get_file_content(working_directory, file_path):
             file_content_string += f'[...File "{file_path}" truncated at 10000 characters]'
     
     return file_content_string
+
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_files_content",
+    description="Lists the content of the specified file, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file": types.Schema(
+                type=types.Type.STRING,
+                description="The file to list the content from, relative to the working directory. If file too long, truncates at 10000 characters",
+            ),
+        },
+    ),
+)
