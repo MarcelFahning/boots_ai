@@ -1,19 +1,17 @@
 from functions.write_file import write_file
 from functions.get_file_content import get_file_content
+from functions.run_python_file import run_python_file
 def main():
 
-    #print(get_file_content("calculator", "lorem.txt"))
-    #print("-----")
-    print(write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum"))
-    print(get_file_content("calculator", "lorem.txt"))
+    print(run_python_file("calculator", "main.py"))
     print("-----")
-    print(write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet"))
-    print(get_file_content("calculator", "pkg/morelorem.txt"))
+    print(run_python_file("calculator", "main.py", ["3 + 5"]))
     print("-----")
-    print(write_file("calculator", "/tmp/temp.txt", "this should not be allowed"))
-    print(get_file_content("calculator", "/tmp/temp.txt"))
-    #print("-----")
-    #print(get_file_content("calculator", "pkg/does_not_exist.py"))
+    print(run_python_file("calculator", "tests.py"))
+    print("-----")
+    print(run_python_file("calculator", "../main.py"))
+    print("-----")
+    print(run_python_file("calculator", "nonexistent.py"))
     
 
 if __name__ == "__main__":
