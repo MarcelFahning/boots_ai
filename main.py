@@ -1,5 +1,6 @@
 import os
 import sys
+from config import MAX_ITERS
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -36,30 +37,21 @@ def main():
     types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
 
-    try:
-        for i in range(0, 20):
-            generated_content = generate_content(client, messages, verbose)
+    iters = 0
+    while True:
+        iters += 1
+        if iters > MAX_ITERS:
+            print(f'Maximum iterations ({MAX_ITERS}) reached.')
+            sys.exit(1)
 
-            if generated_content.candidates:
-                for candidate in generated_content.candidates:
-                    messages.append(candidate.content)
-
-            if generated_content.function_calls:
-                function_parts = []
-                for function_call in generated_content.function_calls:
-                    function_result = call_function(function_call, verbose=verbose)
-                    if not function_result.parts or not function_result.parts[0].function_response:
-                        raise Exception('empty function call result')
-                    function_parts.append(function_result.parts[0])
-
-                messages.append(types.Content(role='user', parts=function_parts))
-                continue
-
-            elif generated_content.text:
-                print(f'Final response: {generated_content.text}')
+        try:
+            final_response = generate_content(client, messages, verbose)
+            if final_response:
+                print("Final response:")
+                print(final_response)
                 break
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(f"Error in generate_content: {e}")
 
 
 def generate_content(client, messages, verbose):
@@ -75,6 +67,14 @@ def generate_content(client, messages, verbose):
     if verbose:
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
+
+    if response.candidates:
+        for candidate in response.candidates:
+            function_call_content = candidate.content
+            messages.append(function_call_content)
+
+    if not response.function_calls:
+        return response.text
 
     if response.function_calls:
         function_responses = []
@@ -92,7 +92,7 @@ def generate_content(client, messages, verbose):
         if not function_responses:
             raise Exception("no function responses generated, exiting.")
 
-    return response
+    messages.append(types.Content(role="user", parts=function_responses))
 
 if __name__ == "__main__":
     main()
