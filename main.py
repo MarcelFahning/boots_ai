@@ -17,7 +17,7 @@ def main():
     for arg in sys.argv[1:]:
         if not arg.startswith("--"):
             args.append(arg)
-    
+
     if not args:
         print("AI Code Assistant")
         print('\nUsage: python main.py "your promt here" [--verbose]')
@@ -36,7 +36,30 @@ def main():
     types.Content(role="user", parts=[types.Part(text=user_prompt)]),
     ]
 
-    generate_content(client, messages, verbose)
+    try:
+        for i in range(0, 20):
+            generated_content = generate_content(client, messages, verbose)
+
+            if generated_content.candidates:
+                for candidate in generated_content.candidates:
+                    messages.append(candidate.content)
+
+            if generated_content.function_calls:
+                function_parts = []
+                for function_call in generated_content.function_calls:
+                    function_result = call_function(function_call, verbose=verbose)
+                    if not function_result.parts or not function_result.parts[0].function_response:
+                        raise Exception('empty function call result')
+                    function_parts.append(function_result.parts[0])
+
+                messages.append(types.Content(role='user', parts=function_parts))
+                continue
+
+            elif generated_content.text:
+                print(f'Final response: {generated_content.text}')
+                break
+    except Exception as e:
+        print(e)
 
 
 def generate_content(client, messages, verbose):
@@ -48,28 +71,28 @@ def generate_content(client, messages, verbose):
             system_instruction=system_prompt
         ),
     )
+
     if verbose:
         print(f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
         print(f"Response tokens: {response.usage_metadata.candidates_token_count}")
-    
-    if not response.function_calls:
-        return response.text
 
-    function_responses = []
-    for function_call in response.function_calls:
-        function_call_result = (call_function(function_call, verbose))
-        if (
-            not function_call_result.parts
-            or not function_call_result.parts[0].function_response
-        ):
-            raise Exception("empty function call result")
-        if verbose:
-            print(f"->{function_call_result.parts[0].function_response.response}")
-        function_responses.append(function_call_result.parts[0])
-    if not function_responses:
-        raise Exception("no function responses generated, exiting.")
-    
+    if response.function_calls:
+        function_responses = []
+        for function_call_part in response.function_calls:
+            function_call_result = call_function(function_call_part, verbose)
+            if (
+                not function_call_result.parts
+                or not function_call_result.parts[0].function_response
+            ):
+                raise Exception("empty function call result")
+            if verbose:
+                print(f"->{function_call_result.parts[0].function_response.response}")
+            function_responses.append(function_call_result.parts[0])
 
+        if not function_responses:
+            raise Exception("no function responses generated, exiting.")
+
+    return response
 
 if __name__ == "__main__":
     main()
